@@ -1,4 +1,4 @@
-package dev.compressor;
+package dev.compressor.endpoint;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -9,10 +9,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 @RestController
 public class FileUploadController {
-
     @RequestMapping(value="/upload", method=RequestMethod.POST)
     public  String handleFileUpload(@RequestParam("name") String name, @RequestParam("file") MultipartFile file){
         if (!file.isEmpty()) {
@@ -26,7 +24,7 @@ public class FileUploadController {
                 return "Вам не удалось загрузить " + name + " => " + e.getMessage();
             }
         } else {
-            return "Вам не удалось загрузить " + name + " потому что файл пустой.";
+                return "Вам не удалось загрузить " + name + " потому что файл пустой.";
         }
     }
 
