@@ -15,11 +15,6 @@ public class FileUploadController {
     @Autowired
     private CompressionService compressionService;
 
-
-
-
-@RestController
-public class FileUploadController {
     @RequestMapping(value = "/download/{filename}",method = RequestMethod.GET)
     public void returnCompressedFile(@PathVariable(name = "filename",required = true) String filename, HttpServletResponse response){
         try {
@@ -49,5 +44,4 @@ public class FileUploadController {
                 return "Вам не удалось загрузить " + name + " потому что файл пустой.";
         }
     }
-
 }
