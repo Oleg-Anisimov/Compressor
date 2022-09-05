@@ -2,11 +2,21 @@ package dev.compressor.endpoint;
 
 import java.io.*;
 
+import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
+import dev.compressor.service.CompressionService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+@RestController
+public class FileUploadController {
 
-import javax.servlet.http.HttpServletResponse;
+
+    @Autowired
+    private CompressionService compressionService;
+
+
+
 
 @RestController
 public class FileUploadController {
@@ -21,10 +31,12 @@ public class FileUploadController {
             throw new RuntimeException(e);
         }
     }
+
     @RequestMapping(value="/upload", method=RequestMethod.POST)
     public  String handleFileUpload(@RequestParam("name") String name, @RequestParam("file") MultipartFile file){
         if (!file.isEmpty()) {
             try {
+                compressionService.compressFile(file,name);
                 byte[] bytes = file.getBytes();
                 BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(name + "-uploaded")));
                 stream.write(bytes);
