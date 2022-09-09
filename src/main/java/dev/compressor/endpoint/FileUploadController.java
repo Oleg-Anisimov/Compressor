@@ -37,13 +37,12 @@ public class FileUploadController {
         }
     }
 
-
     @RequestMapping(value="/upload", method=RequestMethod.POST)
     public  String handleFileUpload(@RequestParam("name") String name, @RequestParam("file") MultipartFile file){
         if (!file.isEmpty()) {
             try {
                 File compressedFile = compressionService.compressFile(file,name);
-                String fileURL = linkingService.createLinkForFile(compressedFile);
+               String fileURL = linkingService.createLinkForFile(compressedFile);
                 byte[] bytes = file.getBytes();
                 BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(name + "-uploaded")));
                 stream.write(bytes);

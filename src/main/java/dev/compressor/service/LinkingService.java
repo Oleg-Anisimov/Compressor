@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,9 +23,9 @@ public class LinkingService {
 
 
    public String createLinkForFile(File file){
-        String key = "733";
+        String key = Base64.getEncoder().encodeToString(file.getName().getBytes(StandardCharsets.UTF_8));
         map.put(key,file);
-        return serviceURL + URLprefix +key;
+        return serviceURL + URLprefix + key;
     }
     public File getByKey(String key){
        return map.get(key);
