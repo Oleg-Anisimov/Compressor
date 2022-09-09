@@ -3,6 +3,8 @@ package dev.compressor.endpoint;
 import java.io.*;
 
 import javax.servlet.http.HttpServletResponse;
+
+import dev.compressor.service.LinkingService;
 import org.apache.commons.io.IOUtils;
 import dev.compressor.service.CompressionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +17,15 @@ public class FileUploadController {
     @Autowired
     private CompressionService compressionService;
 
+    @Autowired
+    private LinkingService linkingService;
+
     @RequestMapping(value = "/download/{filename}",method = RequestMethod.GET)
     public void returnCompressedFile(@PathVariable(name = "filename",required = true) String filename, HttpServletResponse response){
         try {
             response.setContentType("application/txt");
-            InputStream reader = new FileInputStream(filename);
+            String filePath = linkingService.getByKey(filename).getAbsolutePath();
+            InputStream reader = new FileInputStream( filePath);
             IOUtils.copy(reader,response.getOutputStream());
             response.flushBuffer();
         } catch (IOException e) {
@@ -31,12 +37,13 @@ public class FileUploadController {
     public  String handleFileUpload(@RequestParam("name") String name, @RequestParam("file") MultipartFile file){
         if (!file.isEmpty()) {
             try {
-                compressionService.compressFile(file,name);
+                File compressedFile = compressionService.compressFile(file,name);
+               String fileURL = linkingService.createLinkForFile(compressedFile);
                 byte[] bytes = file.getBytes();
                 BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(name + "-uploaded")));
                 stream.write(bytes);
                 stream.close();
-                return "Вы удачно загрузили " + name + " в " + name + "-uploaded !";
+                return "Ссылка: "+ fileURL;
             } catch (Exception e) {
                 return "Вам не удалось загрузить " + name + " => " + e.getMessage();
             }

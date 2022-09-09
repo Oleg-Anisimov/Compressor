@@ -17,14 +17,15 @@ import java.nio.file.StandardOpenOption;
 public class CompressionService {
     public File compressFile(MultipartFile file, String inputFileName){
         Compressor compressor = new SVGCompressor();
+        String outputFileName;
         try {
            byte[] result = compressor.compress(file.getBytes());
-           String outputFileName = inputFileName +"_compressed.svg";
+           outputFileName = inputFileName +"_compressed.svg";
            Files.write(Path.of(outputFileName),result, StandardOpenOption.CREATE);
         } catch (IOException e) {
             log.error("Cannot read bytes from file. {}",e.getMessage());
             throw new RuntimeException(e);
         }
-        return new File("/tmp/new");
+        return new File( outputFileName );
     }
 }
