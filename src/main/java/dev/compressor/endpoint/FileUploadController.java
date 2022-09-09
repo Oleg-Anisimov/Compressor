@@ -8,6 +8,8 @@ import dev.compressor.service.LinkingService;
 import org.apache.commons.io.IOUtils;
 import dev.compressor.service.CompressionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 @RestController
@@ -20,25 +22,28 @@ public class FileUploadController {
     @Autowired
     private LinkingService linkingService;
 
-    @RequestMapping(value = "/download/{filename}",method = RequestMethod.GET)
-    public void returnCompressedFile(@PathVariable(name = "filename",required = true) String filename, HttpServletResponse response){
+    @RequestMapping(value = "/download/{key}",method = RequestMethod.GET)
+    public ResponseEntity returnCompressedFile(@PathVariable(name = "key",required = true) String key){
         try {
-            response.setContentType("application/txt");
-            String filePath = linkingService.getByKey(filename).getAbsolutePath();
-            InputStream reader = new FileInputStream( filePath);
-            IOUtils.copy(reader,response.getOutputStream());
-            response.flushBuffer();
-        } catch (IOException e) {
+            File file = linkingService.getByKey(key);
+            String filePath = file.getAbsolutePath();
+            String fileName = file.getName();
+            HttpHeaders header = new HttpHeaders();
+            header.setContentType(MediaType.APPLICATION_PDF);
+            header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+            return new ResponseEntity<FileSystemResource>(new FileSystemResource(filePath), header, HttpStatus.OK);
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
+
 
     @RequestMapping(value="/upload", method=RequestMethod.POST)
     public  String handleFileUpload(@RequestParam("name") String name, @RequestParam("file") MultipartFile file){
         if (!file.isEmpty()) {
             try {
                 File compressedFile = compressionService.compressFile(file,name);
-               String fileURL = linkingService.createLinkForFile(compressedFile);
+                String fileURL = linkingService.createLinkForFile(compressedFile);
                 byte[] bytes = file.getBytes();
                 BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(name + "-uploaded")));
                 stream.write(bytes);
